@@ -7,9 +7,7 @@
 ### 关键词思路
 
 - **a涵盖b** → Counter(a) >= Counter(b)
-
 - **遍历** → DFS/BFS
-
 - **数组 + 考虑某元素两边** → 从左到右遍历 + 从右到左遍历
   - 238、135、42
 
@@ -24,9 +22,13 @@
 - **字符串匹配** → KMP
 - **具有最大和的连续子数组** → Kadane 算法
 
-### 数据结构
+### 数据结构思路
 
-- **二叉搜索树** → 中序遍历
+- **二叉搜索树** → 是否使用中序遍历为递增数列的特点
+
+- **动态维护Top K** → 堆
+
+### 常见方法模板
 
 #### 回溯模板
 
@@ -97,10 +99,50 @@ def bfs(start):
                     queue.append(neighbor)
 ```
 
+##### 二叉树层序遍历
+
+```python
+# 含深度的二叉树层序遍历
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def zigzagLevelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        
+        queue = deque([(root, 0)])
+        max_depth = -1
+        tree_at_depth = dict()
+        
+        while(queue):
+            node, depth = queue.popleft()
+
+            if node:
+                if depth > max_depth:
+                    max_depth = depth
+                    tree_at_depth[depth] = [node.val]
+                else:
+                    tree_at_depth[depth].append(node.val)
+
+                queue.append([node.left, depth + 1])
+                queue.append([node.right, depth + 1])
+        return [tree_at_depth[i] for i in range(max_depth + 1)]
+```
+
+
+
+
+
 #### 动态规划思考路径
 
 1. 是否可以拆解为 f(k+1) = g(f(k)) 或者 g(f(1, ..., k)) 的逻辑
-2. 写出状态转移公式
+2. 写出状态转移公式/代码逻辑
+
+具体问题具体分析！
 
 #### 滑动窗口思考路径
 
@@ -110,7 +152,49 @@ def bfs(start):
 
 #### KMP模板
 
-思路：通过前缀表记录，减少重复匹配，将时间复杂度从O(m * n) 降低到 O(m + n)
+思路：通过前缀表记录，在匹配失败时从下一个合适位置继续检索，减少重复匹配，将时间复杂度从O(m * n) 降低到 O(m + n)
+
+理解：【帮你把KMP算法学个通透！（理论篇）】 https://www.bilibili.com/video/BV1PD4y1o7nd/?share_source=copy_web&vd_source=5d08564ce088a80b77e6aa6282030c68
+
+```python
+# Leetcode 28
+// 方法一
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        a=len(needle)
+        b=len(haystack)
+        if a==0:
+            return 0
+        next=self.getnext(a,needle)
+        p=-1
+        for j in range(b):
+            while p>=0 and needle[p+1]!=haystack[j]:
+                p=next[p]
+            if needle[p+1]==haystack[j]:
+                p+=1
+            if p==a-1:
+                return j-a+1
+        return -1
+
+    def getnext(self,a,needle):
+        next=['' for i in range(a)]
+        k=-1
+        next[0]=k
+        for i in range(1,len(needle)):
+            while (k>-1 and needle[k+1]!=needle[i]):
+                k=next[k]
+            if needle[k+1]==needle[i]:
+                k+=1
+            next[i]=k
+        return next
+
+作者：代码随想录
+链接：https://leetcode.cn/problems/find-the-index-of-the-first-occurrence-in-a-string/solutions/732461/dai-ma-sui-xiang-lu-kmpsuan-fa-xiang-jie-mfbs/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+
 
 
 
@@ -316,5 +400,157 @@ class Solution:
         s = s.replace(' ', '')
         result, _ = helper(0)
         return result
+```
+
+## Python常见数据结构调用语法
+
+### 列表（List）
+
+- **特点**: 有序、可变、支持重复元素。
+- **常用方法**: `append`, `insert`, `remove`, `pop`, `sort`, `reverse` 等。
+
+```python
+# 创建列表
+my_list = [1, 2, 3, 4]
+
+# 添加元素
+my_list.append(5)       # [1, 2, 3, 4, 5]
+
+# 删除元素
+my_list.remove(99)      # [1, 2, 3, 4, 5]
+
+# 获取最后一个元素并删除
+last_element = my_list.pop()  # [1, 2, 3, 4], last_element = 5
+
+# 插入最前 无直接实现函数，但可以：
+my_list = [0] + my_list
+
+# 创建固定长度列表
+my_list = [0] * n
+
+# 排序
+my_list.sort()          # 升序排序
+
+# 倒序
+my_list.reverse()       # [4, 3, 2, 1]
+```
+
+### 集合（Set）
+
+- **特点**: 无序、元素唯一、不支持重复。
+- **常用方法**: `add`, `remove`, `union`, `intersection`, `difference` 等。
+
+```python
+# 创建集合
+my_set = {1, 2, 3, 4}
+# 添加元素 注意是add！
+my_set.add(5)           # {1, 2, 3, 4, 5}
+# 删除元素
+my_set.remove(3)        # {1, 2, 4, 5}
+```
+
+### 双端队列（Deque）
+
+- **特点**: 双端队列，可以从两端添加或移除元素。
+- **需要导入模块**: `collections.deque`
+- **常用方法**: `append`, `appendleft`, `pop`, `popleft`, `extend`, `extendleft` 等。
+
+```python
+from collections import deque
+
+# 创建双端队列
+my_deque = deque([1, 2, 3])
+
+# 从右端添加元素
+my_deque.append(4)      # deque([1, 2, 3, 4])
+
+# 从左端添加元素
+my_deque.appendleft(0)  # deque([0, 1, 2, 3, 4])
+
+# 从右端移除元素
+my_deque.pop()          # deque([0, 1, 2, 3])
+
+# 从左端移除元素
+my_deque.popleft()      # deque([1, 2, 3])
+```
+
+### 字典（Dictionary）
+
+- **特点**: 键值对形式存储，无序（Python 3.7+ 的实现是插入顺序）。
+- **常用方法**: `get`, `keys`, `values`, `items`, `pop` 等。
+
+```python
+# 创建字典
+my_dict = {"a": 1, "b": 2, "c": 3}
+# 添加/更新键值对
+my_dict["d"] = 4        # {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+# 获取值
+value = my_dict["a"]    # 1
+# 删除键值对
+my_dict.pop("b")        # {'a': 1, 'c': 3, 'd': 4}
+del my_dict["b"]
+# 遍历键值对
+for key, value in my_dict.items():
+    print(key, value)
+# 打印值
+print(my_dict.values())
+```
+
+### 堆栈（Stack）
+
+- **特点**: 使用 `list` 模拟，遵循后进先出（LIFO）原则。
+
+```python
+stack = []
+# 压栈
+stack.append(1)
+stack.append(2)         # [1, 2]
+# 出栈
+top = stack.pop()       # [1], top = 2
+```
+
+### 堆（Heap）
+
+- 特点
+  - 堆是一种完全二叉树，常用来快速找到最大值或最小值。
+  - Python 的 `heapq` 模块提供最小堆实现，最大堆需要通过**对元素取负数实现**。
+- **常用方法**: `heappush`, `heappop`, `heapify` 等。
+
+```python
+import heapq
+
+# 最小堆
+min_heap = []
+heapq.heappush(min_heap, 3)   # [3]
+heapq.heappush(min_heap, 1)   # [1, 3]
+heapq.heappush(min_heap, 4)   # [1, 3, 4]
+print(heapq.heappop(min_heap))  # 1, 堆变为 [3, 4]
+
+# 最大堆（通过负值实现）
+max_heap = []
+heapq.heappush(max_heap, -3)  # [-3]
+heapq.heappush(max_heap, -1)  # [-3, -1]
+heapq.heappush(max_heap, -4)  # [-4, -1, -3]
+print(-heapq.heappop(max_heap))  # 3, 堆变为 [-3, -1]
+
+# 堆化
+nums = [4, 1, 7, 3, 8]
+heapq.heapify(nums)           # 最小堆 [1, 3, 7, 4, 8]
+```
+
+### 优先队列（Priority Queue）
+
+- **特点**: 按照优先级处理元素，可以看作堆的高级应用。
+- **实现方式**: 使用 `heapq` 模拟或 `queue.PriorityQueue`。
+
+```python
+import heapq
+
+# 优先队列（使用元组存储优先级）
+pq = []
+heapq.heappush(pq, (2, "task2"))  # 优先级为 2 的任务
+heapq.heappush(pq, (1, "task1"))  # 优先级为 1 的任务
+heapq.heappush(pq, (3, "task3"))  # 优先级为 3 的任务
+print(heapq.heappop(pq))          # (1, "task1")
 ```
 
